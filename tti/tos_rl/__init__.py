@@ -18,12 +18,32 @@ Core modules:
 - utils: Utilities and helpers
 """
 
-from .objectives import CostAwareUtility, compute_cost_aware_utility
-from .optimization import GroupRelativePolicyOptimization, GRPOLoss
-from .branching import PrefixBrancher, BranchCollector
+from .objectives import (
+    CostAwareUtility,
+    compute_cost_aware_utility,
+    batch_compute_utilities,
+    normalize_utilities,
+)
+from .optimization import (
+    GroupRelativePolicyOptimization,
+    GRPOLoss,
+    GRPOConfig,
+)
+from .branching import (
+    PrefixBrancher,
+    BranchCollector,
+    Prefix,
+    Branch,
+)
 from .training import TOSRLTrainer, TOSRLConfig
 from .inference import TOSRLInference, TokenMode
-from .utils import BudgetState, CostMetrics
+from .utils import (
+    BudgetState,
+    CostMetrics,
+    TokenModeFormatter,
+    CostCoefficientSchedule,
+    create_budget_prompt_suffix,
+)
 
 __version__ = "1.0.0"
 
@@ -31,14 +51,19 @@ __all__ = [
     # Objectives
     "CostAwareUtility",
     "compute_cost_aware_utility",
+    "batch_compute_utilities",
+    "normalize_utilities",
 
     # Optimization
     "GroupRelativePolicyOptimization",
     "GRPOLoss",
+    "GRPOConfig",
 
     # Branching
     "PrefixBrancher",
     "BranchCollector",
+    "Prefix",
+    "Branch",
 
     # Training
     "TOSRLTrainer",
@@ -51,4 +76,7 @@ __all__ = [
     # Utils
     "BudgetState",
     "CostMetrics",
+    "TokenModeFormatter",
+    "CostCoefficientSchedule",
+    "create_budget_prompt_suffix",
 ]

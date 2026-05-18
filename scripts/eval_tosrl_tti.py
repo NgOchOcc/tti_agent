@@ -19,13 +19,23 @@ PROJECT_ROOT = Path(__file__).parent.parent
 sys.path.insert(0, str(PROJECT_ROOT))
 
 import yaml
-import torch
 import numpy as np
 
-from tti.tos_rl import (
-    TOSRLInference,
-    BudgetState,
-)
+try:
+    import torch
+except ImportError:
+    print("Error: PyTorch not installed. Install with: pip install torch")
+    sys.exit(1)
+
+try:
+    from tti.tos_rl import (
+        TOSRLInference,
+        BudgetState,
+    )
+except ImportError as e:
+    print(f"Error importing TOS-RL modules: {e}")
+    print("Make sure you're in the correct directory and all files exist")
+    sys.exit(1)
 
 logging.basicConfig(
     level=logging.INFO,
