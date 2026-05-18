@@ -1,58 +1,36 @@
 #!/usr/bin/env python3
-"""
-Create sample trajectory file for testing real data training.
+"""Generate sample trajectory data for testing."""
 
-This script generates synthetic trajectories in the correct JSONL format.
-In production, trajectories come from your actual TTI agent.
-
-Usage:
-  python3 create_sample_trajectories.py                    # 100 trajectories
-  python3 create_sample_trajectories.py --num-tasks 500    # 500 trajectories
-  python3 create_sample_trajectories.py --num-trajectories 4  # 4 per task
-"""
-
-import json
 import argparse
+import json
+import logging
 import random
+import sys
 from pathlib import Path
+from typing import List, Dict, Any
+
+logging.basicConfig(level=logging.INFO)
+logger = logging.getLogger(__name__)
 
 
-def create_sample_trajectories(
-    num_tasks: int = 100,
-    num_trajectories_per_task: int = 4,
-    output_file: str = "../data/sample_trajectories.jsonl"
-) -> None:
-    """
-    Create sample trajectory file for testing.
+class TrajectoryGenerator:
+    """Generate synthetic trajectory data."""
 
-    Args:
-        num_tasks: Number of unique tasks
-        num_trajectories_per_task: Trajectories per task
-        output_file: Output JSONL file path
-    """
-    output_path = Path(output_file)
-    output_path.parent.mkdir(parents=True, exist_ok=True)
-
-    print(f"Generating {num_tasks} tasks × {num_trajectories_per_task} trajectories...")
-    print(f"Output: {output_path}")
-
-    total_trajectories = 0
-
-    # Mode patterns (realistic patterns from LLM agents)
-    mode_patterns = [
+    MODE_PATTERNS = [
         ["THINK", "OBSERVE", "ANSWER"],
         ["THINK", "OBSERVE", "OBSERVE", "ANSWER"],
         ["OBSERVE", "OBSERVE", "OBSERVE", "ANSWER"],
         ["THINK", "OBSERVE", "OBSERVE", "OBSERVE", "ANSWER"],
         ["THINK", "THINK", "OBSERVE", "OBSERVE", "ANSWER"],
-        ["OBSERVE", "ANSWER"],
-        ["THINK", "ANSWER"],
     ]
 
-    with open(output_path, "w") as f:
+    @staticmethod
+    def generate(num_tasks: int, num_per_task: int = 4) -> List[Dict[str, Any]]:
+        """Generate synthetic trajectories."""
+        trajectories = []
+
         for task_id in range(1, num_tasks + 1):
-            for traj_idx in range(num_trajectories_per_task):
-                # Generate trajectory
+            for _ in range(num_per_task):
                 trajectory = {
                     "task_id": f"task_{task_id:04d}",
                     "success": random.randint(0, 1),
@@ -60,72 +38,80 @@ def create_sample_trajectories(
                     "num_tokens": random.randint(100, 800),
                     "num_loops": random.randint(0, 3),
                     "num_bad_actions": random.randint(0, 2),
-                    "modes": random.choice(mode_patterns),
+                    "modes": random.choice(TrajectoryGenerator.MODE_PATTERNS),
                 }
+                trajectories.append(trajectory)
 
-                # Write to JSONL
-                f.write(json.dumps(trajectory) + "\n")
-                total_trajectories += 1
+        return trajectories
 
-    # Verify file
-    with open(output_path, "r") as f:
-        lines = f.readlines()
+    @staticmethod
+    def save(trajectories: List[Dict[str, Any]], output_file: str) -> None:
+        """Save trajectories to JSONL file."""
+        output_path = Path(output_file)
+        output_path.parent.mkdir(parents=True, exist_ok=True)
 
-    print(f"\n✓ Generated {len(lines)} trajectories")
+        with open(output_path, "w") as f:
+            for traj in trajectories:
+                f.write(json.dumps(traj) + "\n")
 
-    # Analyze
-    trajectories = [json.loads(line) for line in lines]
-    success_count = sum(1 for t in trajectories if t["success"])
+        logger.info(f"Saved {len(trajectories)} trajectories to {output_path}")
 
-    print(f"\nStatistics:")
-    print(f"  Unique tasks: {num_tasks}")
-    print(f"  Total trajectories: {len(trajectories)}")
-    print(f"  Success rate: {100 * success_count / len(trajectories):.1f}%")
-    print(f"  Avg steps: {sum(t['num_steps'] for t in trajectories) / len(trajectories):.1f}")
-    print(f"  Avg tokens: {sum(t['num_tokens'] for t in trajectories) / len(trajectories):.0f}")
+    @staticmethod
+    def analyze(trajectories: List[Dict[str, Any]]) -> None:
+        """Analyze trajectory statistics."""
+        success_count = sum(1 for t in trajectories if t["success"])
+        avg_steps = sum(t["num_steps"] for t in trajectories) / len(trajectories)
+        avg_tokens = sum(t["num_tokens"] for t in trajectories) / len(trajectories)
 
-    # Sample
-    print(f"\nFirst 3 trajectories:")
-    for i, traj in enumerate(trajectories[:3]):
-        print(f"  {i+1}. task_id={traj['task_id']}, success={traj['success']}, "
-              f"steps={traj['num_steps']}, tokens={traj['num_tokens']}")
+        all_modes = []
+        for t in trajectories:
+            all_modes.extend(t["modes"])
 
-    print(f"\n✓ Ready for training!")
-    print(f"\nNext: Run training with")
-    print(f"  ./run_train_real_data.sh --trajectory-file {output_path}")
+        print(f"\nStatistics:")
+        print(f"  Total: {len(trajectories)}")
+        print(f"  Success rate: {100 * success_count / len(trajectories):.1f}%")
+        print(f"  Avg steps: {avg_steps:.1f}")
+        print(f"  Avg tokens: {avg_tokens:.0f}")
+        print(f"  Mode distribution:")
+        print(f"    THINK: {100 * all_modes.count('THINK') / len(all_modes):.1f}%")
+        print(f"    OBSERVE: {100 * all_modes.count('OBSERVE') / len(all_modes):.1f}%")
+        print(f"    ANSWER: {100 * all_modes.count('ANSWER') / len(all_modes):.1f}%")
 
 
-def main():
-    parser = argparse.ArgumentParser(
-        description="Create sample trajectory file for testing"
-    )
+def main() -> None:
+    """Main entry point."""
+    parser = argparse.ArgumentParser(description="Generate sample trajectories")
     parser.add_argument(
         "--num-tasks",
         type=int,
-        default=100,
-        help="Number of unique tasks (default: 100)"
+        default=20,
+        help="Number of unique tasks"
     )
     parser.add_argument(
         "--num-trajectories",
         type=int,
         default=4,
-        help="Trajectories per task (default: 4)"
+        help="Trajectories per task"
     )
     parser.add_argument(
         "--output",
-        type=str,
         default="../data/sample_trajectories.jsonl",
         help="Output file path"
     )
 
     args = parser.parse_args()
+    total = args.num_tasks * args.num_trajectories
 
-    create_sample_trajectories(
-        num_tasks=args.num_tasks,
-        num_trajectories_per_task=args.num_trajectories,
-        output_file=args.output
-    )
+    logger.info(f"Generating {args.num_tasks} tasks × {args.num_trajectories} = {total} trajectories")
+
+    trajectories = TrajectoryGenerator.generate(args.num_tasks, args.num_trajectories)
+    TrajectoryGenerator.save(trajectories, args.output)
+    TrajectoryGenerator.analyze(trajectories)
 
 
 if __name__ == "__main__":
-    main()
+    try:
+        main()
+    except Exception as e:
+        logger.error(f"Error: {e}")
+        sys.exit(1)
