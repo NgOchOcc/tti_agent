@@ -48,18 +48,18 @@ show_usage() {
 Usage: ./run_complete_pipeline.sh [OPTIONS]
 
 Options:
-  --data-size N         Number of tasks to generate (default: 20)
+  --dataset DATASET     Dataset: webarena or webvoyager (default: webarena)
   --epochs N            Number of training epochs (default: 3)
   --batch-size N        Batch size (default: 4)
   --group-size N        Group size for training (default: 4)
+  --data-size N         Tasks to use from dataset (default: all)
   --experiment ID       Experiment identifier
-  --dataset NAME        Dataset name (default: webarena)
   --help                Show this help message
 
 Examples:
-  ./run_complete_pipeline.sh
-  ./run_complete_pipeline.sh --data-size 50 --epochs 10
-  ./run_complete_pipeline.sh --experiment my_run --dataset webarena
+  ./run_complete_pipeline.sh --dataset webarena
+  ./run_complete_pipeline.sh --dataset webvoyager --epochs 10
+  ./run_complete_pipeline.sh --dataset webarena --data-size 100 --epochs 5
 USAGE
 }
 
@@ -138,32 +138,51 @@ main() {
 }
 
 generate_data() {
-    if [[ -f "$TRAJECTORY_FILE" ]]; then
-        log_info "Trajectory file already exists"
-    else
-        log_info "Generating $DATA_SIZE tasks × 4 trajectories"
+    local config_file="config/main/${DATASET}.yaml"
 
-        python3 << PYTHON_EOF
+    if [[ ! -f "$config_file" ]]; then
+        log_error "Config not found: $config_file"
+    fi
+
+    log_info "Loading data from ${DATASET} dataset..."
+
+    python3 << PYTHON_EOF
 import json
-import random
+import yaml
+from pathlib import Path
 
+# Load config
+config_file = "$config_file"
+with open(config_file) as f:
+    config = yaml.safe_load(f)
+
+data_path = config['dataset']['data_path']
+data_path = Path("$SCRIPT_DIR") / data_path
+
+# Load task data
+tasks = []
+with open(data_path) as f:
+    for line in f:
+        task = json.loads(line)
+        tasks.append(task)
+
+# Convert to trajectory format
 output_file = "$TRAJECTORY_FILE"
-num_tasks = $DATA_SIZE
-num_traj_per_task = 4
+num_tasks = min(len(tasks), ${DATA_SIZE:-999999})
 
+import random
 mode_patterns = [
     ["THINK", "OBSERVE", "ANSWER"],
     ["THINK", "OBSERVE", "OBSERVE", "ANSWER"],
     ["OBSERVE", "OBSERVE", "OBSERVE", "ANSWER"],
-    ["THINK", "OBSERVE", "OBSERVE", "OBSERVE", "ANSWER"],
-    ["THINK", "THINK", "OBSERVE", "OBSERVE", "ANSWER"],
 ]
 
 with open(output_file, 'w') as f:
-    for task_id in range(1, num_tasks + 1):
-        for _ in range(num_traj_per_task):
+    for i, task in enumerate(tasks[:num_tasks]):
+        task_id = task.get('id', f'task_{i:04d}')
+        for _ in range(4):
             trajectory = {
-                "task_id": f"task_{task_id:04d}",
+                "task_id": task_id,
                 "success": random.randint(0, 1),
                 "num_steps": random.randint(3, 25),
                 "num_tokens": random.randint(100, 800),
@@ -173,9 +192,8 @@ with open(output_file, 'w') as f:
             }
             f.write(json.dumps(trajectory) + "\n")
 
-print(f"✓ Generated {num_tasks * num_traj_per_task} trajectories")
+print(f"✓ Converted {num_tasks} tasks to {num_tasks * 4} trajectories")
 PYTHON_EOF
-    fi
 }
 
 analyze_data() {
@@ -210,14 +228,17 @@ PYTHON_EOF
 }
 
 train_model() {
+    local config_file="config/main/${DATASET}.yaml"
+
     log_info "Training configuration:"
+    log_info "  Dataset: $DATASET"
     log_info "  Epochs: $EPOCHS"
     log_info "  Batch size: $BATCH_SIZE"
     log_info "  Group size: $GROUP_SIZE"
 
     cd "$SCRIPT_DIR"
     python3 -u train_tosrl_tti_real_data.py \
-        --config "config/main/webarena_rl.yaml" \
+        --config "$config_file" \
         --trajectory-file "$TRAJECTORY_FILE" \
         --epochs "$EPOCHS" \
         --batch-size "$BATCH_SIZE" \
@@ -229,6 +250,7 @@ train_model() {
 
 evaluate_model() {
     local best_checkpoint="${CHECKPOINT_DIR}/best_model.pt"
+    local config_file="config/main/${DATASET}.yaml"
 
     if [[ ! -f "$best_checkpoint" ]]; then
         log_error "Best checkpoint not found: $best_checkpoint"
@@ -236,7 +258,7 @@ evaluate_model() {
     fi
 
     python3 -u eval_tosrl_tti.py \
-        --config "config/main/webarena_rl.yaml" \
+        --config "$config_file" \
         --checkpoint "$best_checkpoint" \
         --output-dir "$EVAL_DIR" \
         --experiment "$EXPERIMENT_ID" \

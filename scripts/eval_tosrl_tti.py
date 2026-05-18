@@ -126,9 +126,15 @@ def main() -> None:
 
     args = parser.parse_args()
 
+    logger.info(f"=== TOS-RL Evaluation Pipeline ===")
+    logger.info(f"Dataset: {args.dataset}")
+    logger.info(f"Experiment: {args.experiment}")
+
     # Load config
     with open(args.config) as f:
         config = yaml.safe_load(f)
+
+    logger.info(f"Config loaded: {config['dataset']['name']}")
 
     # Run evaluation
     pipeline = EvaluationPipeline(

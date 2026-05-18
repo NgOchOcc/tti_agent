@@ -10,7 +10,6 @@ readonly SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 readonly PROJECT_DIR="$(dirname "$SCRIPT_DIR")"
 
 # Defaults
-CONFIG="config/main/webarena_rl.yaml"
 TRAJECTORY_FILE=""
 EPOCHS=10
 BATCH_SIZE=4
@@ -18,6 +17,7 @@ GROUP_SIZE=4
 OUTPUT_DIR=""
 EXPERIMENT_ID=""
 DATASET="webarena"
+CONFIG=""
 
 # ============================================================================
 # Functions
@@ -41,13 +41,16 @@ Required:
   --output-dir DIR          Output directory for logs and checkpoints
 
 Options:
-  --config FILE             Config YAML file
+  --dataset NAME            Dataset name: webarena or webvoyager (default: webarena)
   --epochs N                Number of training epochs (default: 10)
   --batch-size N            Batch size (default: 4)
   --group-size N            Group size (default: 4)
   --experiment ID           Experiment identifier
-  --dataset NAME            Dataset name (default: webarena)
   --help                    Show this help message
+
+Examples:
+  ./run_train_real_data.sh --trajectory-file data.jsonl --output-dir logs/train
+  ./run_train_real_data.sh --trajectory-file data.jsonl --output-dir logs/train --dataset webvoyager
 USAGE
 }
 
@@ -107,6 +110,11 @@ done
 
 validate_args
 
+# Set config based on dataset if not provided
+if [[ -z "$CONFIG" ]]; then
+    CONFIG="config/main/${DATASET}.yaml"
+fi
+
 mkdir -p "$OUTPUT_DIR"
 
 # ============================================================================
@@ -114,9 +122,15 @@ mkdir -p "$OUTPUT_DIR"
 # ============================================================================
 
 log_info "Starting training..."
+log_info "Dataset: $DATASET"
+log_info "Config: $CONFIG"
 log_info "Trajectory file: $TRAJECTORY_FILE"
 log_info "Output directory: $OUTPUT_DIR"
 log_info "Epochs: $EPOCHS"
+
+if [[ ! -f "$SCRIPT_DIR/$CONFIG" ]]; then
+    log_error "Config file not found: $CONFIG"
+fi
 
 cd "$SCRIPT_DIR"
 

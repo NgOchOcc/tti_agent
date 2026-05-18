@@ -1,0 +1,34 @@
+# WebVoyager Dataset Configuration
+
+dataset:
+  name: webvoyager
+  description: "WebVoyager - Multi-Website Tasks"
+  data_path: "../../tasks/webvoyager_train_data.jsonl"
+  test_path: "../../tasks/webvoyager_test_data.jsonl"
+  subset_path: "../../tasks/webvoyager_subset.jsonl"
+
+training:
+  epochs: 10
+  batch_size: 4
+  grad_accum_steps: 2
+  eval_freq: 1
+  save_freq: 1
+  learning_rate: 1.0e-5
+
+model:
+  group_size: 4
+  mode_weight: 2.0
+  use_branching: false
+
+optimization:
+  optimizer: "adam"
+  lr_scheduler: "linear"
+  warmup_steps: 100
+  weight_decay: 0.01
+
+evaluation:
+  num_eval_tasks: 100
+  cost_preferences:
+    - high_efficiency
+    - balanced
+    - high_success

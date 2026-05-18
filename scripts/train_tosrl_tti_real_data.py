@@ -203,13 +203,20 @@ def main() -> None:
     parser.add_argument("--group-size", type=int, default=4, help="Group size")
     parser.add_argument("--output-dir", required=True, help="Output directory")
     parser.add_argument("--experiment", required=True, help="Experiment ID")
-    parser.add_argument("--dataset", default="webarena", help="Dataset name")
+    parser.add_argument("--dataset", default="webarena", help="Dataset name (webarena|webvoyager)")
 
     args = parser.parse_args()
+
+    logger.info(f"=== TOS-RL Training Pipeline ===")
+    logger.info(f"Dataset: {args.dataset}")
+    logger.info(f"Experiment: {args.experiment}")
+    logger.info(f"Config: {args.config}")
 
     # Load config
     with open(args.config) as f:
         config = yaml.safe_load(f)
+
+    logger.info(f"Config loaded: {config['dataset']['name']}")
 
     # Run pipeline
     pipeline = TrainingPipeline(

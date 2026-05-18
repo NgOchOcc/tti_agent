@@ -9,13 +9,13 @@ set -euo pipefail
 readonly SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 
 # Defaults
-CONFIG="config/main/webarena_rl.yaml"
 CHECKPOINT=""
 OUTPUT_DIR=""
 EXPERIMENT_ID="evaluation"
 DATASET="webarena"
 NUM_TASKS=100
 COST_PREFERENCE="balanced"
+CONFIG=""
 
 # ============================================================================
 # Functions
@@ -39,13 +39,16 @@ Required:
   --output-dir DIR          Output directory for evaluation results
 
 Options:
-  --config FILE             Config YAML file
+  --dataset NAME            Dataset: webarena or webvoyager (default: webarena)
   --experiment ID           Experiment identifier
-  --dataset NAME            Dataset name (default: webarena)
   --cost-preference PREF    Cost preference (default: balanced)
                             Options: high_efficiency, balanced, high_success
   --num-tasks N             Number of tasks to evaluate (default: 100)
   --help                    Show this help message
+
+Examples:
+  ./run_eval.sh --checkpoint model.pt --output-dir logs/eval
+  ./run_eval.sh --checkpoint model.pt --output-dir logs/eval --dataset webvoyager
 USAGE
 }
 
@@ -100,6 +103,12 @@ while [[ $# -gt 0 ]]; do
 done
 
 validate_args
+
+# Set config based on dataset if not provided
+if [[ -z "$CONFIG" ]]; then
+    CONFIG="config/main/${DATASET}.yaml"
+fi
+
 mkdir -p "$OUTPUT_DIR"
 
 # ============================================================================
@@ -107,9 +116,15 @@ mkdir -p "$OUTPUT_DIR"
 # ============================================================================
 
 log_info "Starting evaluation..."
+log_info "Dataset: $DATASET"
+log_info "Config: $CONFIG"
 log_info "Checkpoint: $CHECKPOINT"
 log_info "Cost preference: $COST_PREFERENCE"
 log_info "Output directory: $OUTPUT_DIR"
+
+if [[ ! -f "$SCRIPT_DIR/$CONFIG" ]]; then
+    log_error "Config file not found: $CONFIG"
+fi
 
 cd "$SCRIPT_DIR"
 
