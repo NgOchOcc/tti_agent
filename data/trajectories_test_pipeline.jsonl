@@ -1,0 +1,20 @@
+{"task_id": "task_0001", "success": 1, "num_steps": 5, "num_tokens": 797, "num_loops": 1, "num_bad_actions": 1, "modes": ["THINK", "THINK", "OBSERVE", "OBSERVE", "ANSWER"]}
+{"task_id": "task_0001", "success": 0, "num_steps": 14, "num_tokens": 621, "num_loops": 0, "num_bad_actions": 1, "modes": ["THINK", "OBSERVE", "OBSERVE", "OBSERVE", "ANSWER"]}
+{"task_id": "task_0001", "success": 1, "num_steps": 21, "num_tokens": 758, "num_loops": 0, "num_bad_actions": 1, "modes": ["THINK", "THINK", "OBSERVE", "OBSERVE", "ANSWER"]}
+{"task_id": "task_0001", "success": 1, "num_steps": 10, "num_tokens": 355, "num_loops": 2, "num_bad_actions": 1, "modes": ["THINK", "OBSERVE", "ANSWER"]}
+{"task_id": "task_0002", "success": 0, "num_steps": 5, "num_tokens": 156, "num_loops": 3, "num_bad_actions": 0, "modes": ["THINK", "THINK", "OBSERVE", "OBSERVE", "ANSWER"]}
+{"task_id": "task_0002", "success": 0, "num_steps": 11, "num_tokens": 210, "num_loops": 0, "num_bad_actions": 2, "modes": ["THINK", "OBSERVE", "ANSWER"]}
+{"task_id": "task_0002", "success": 1, "num_steps": 6, "num_tokens": 119, "num_loops": 0, "num_bad_actions": 1, "modes": ["THINK", "OBSERVE", "OBSERVE", "OBSERVE", "ANSWER"]}
+{"task_id": "task_0002", "success": 1, "num_steps": 22, "num_tokens": 746, "num_loops": 2, "num_bad_actions": 0, "modes": ["THINK", "OBSERVE", "OBSERVE", "OBSERVE", "ANSWER"]}
+{"task_id": "task_0003", "success": 0, "num_steps": 22, "num_tokens": 175, "num_loops": 1, "num_bad_actions": 2, "modes": ["THINK", "THINK", "OBSERVE", "OBSERVE", "ANSWER"]}
+{"task_id": "task_0003", "success": 1, "num_steps": 20, "num_tokens": 262, "num_loops": 2, "num_bad_actions": 0, "modes": ["THINK", "THINK", "OBSERVE", "OBSERVE", "ANSWER"]}
+{"task_id": "task_0003", "success": 0, "num_steps": 7, "num_tokens": 399, "num_loops": 3, "num_bad_actions": 0, "modes": ["THINK", "OBSERVE", "OBSERVE", "ANSWER"]}
+{"task_id": "task_0003", "success": 0, "num_steps": 9, "num_tokens": 457, "num_loops": 2, "num_bad_actions": 0, "modes": ["THINK", "THINK", "OBSERVE", "OBSERVE", "ANSWER"]}
+{"task_id": "task_0004", "success": 1, "num_steps": 3, "num_tokens": 244, "num_loops": 1, "num_bad_actions": 0, "modes": ["OBSERVE", "OBSERVE", "OBSERVE", "ANSWER"]}
+{"task_id": "task_0004", "success": 1, "num_steps": 14, "num_tokens": 108, "num_loops": 2, "num_bad_actions": 1, "modes": ["THINK", "THINK", "OBSERVE", "OBSERVE", "ANSWER"]}
+{"task_id": "task_0004", "success": 0, "num_steps": 7, "num_tokens": 750, "num_loops": 2, "num_bad_actions": 1, "modes": ["THINK", "OBSERVE", "OBSERVE", "ANSWER"]}
+{"task_id": "task_0004", "success": 1, "num_steps": 5, "num_tokens": 678, "num_loops": 2, "num_bad_actions": 2, "modes": ["OBSERVE", "OBSERVE", "OBSERVE", "ANSWER"]}
+{"task_id": "task_0005", "success": 1, "num_steps": 10, "num_tokens": 750, "num_loops": 2, "num_bad_actions": 2, "modes": ["OBSERVE", "OBSERVE", "OBSERVE", "ANSWER"]}
+{"task_id": "task_0005", "success": 1, "num_steps": 15, "num_tokens": 253, "num_loops": 0, "num_bad_actions": 1, "modes": ["THINK", "THINK", "OBSERVE", "OBSERVE", "ANSWER"]}
+{"task_id": "task_0005", "success": 0, "num_steps": 16, "num_tokens": 652, "num_loops": 3, "num_bad_actions": 1, "modes": ["OBSERVE", "OBSERVE", "OBSERVE", "ANSWER"]}
+{"task_id": "task_0005", "success": 1, "num_steps": 25, "num_tokens": 141, "num_loops": 2, "num_bad_actions": 2, "modes": ["THINK", "OBSERVE", "OBSERVE", "ANSWER"]}

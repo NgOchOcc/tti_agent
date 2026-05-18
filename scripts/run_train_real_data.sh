@@ -209,11 +209,11 @@ print_config
 
 # Validate trajectory file format
 echo -e "${YELLOW}Validating trajectory file...${NC}"
-python3 << 'EOF'
+python3 << EOF
 import json
 import sys
 
-trajectory_file = sys.argv[1]
+trajectory_file = "$TRAJECTORY_FILE"
 try:
     with open(trajectory_file, 'r') as f:
         count = 0
@@ -234,7 +234,7 @@ try:
 except Exception as e:
     print(f"Error reading trajectory file: {e}")
     sys.exit(1)
-EOF "$TRAJECTORY_FILE"
+EOF
 
 if [ $? -ne 0 ]; then
     echo -e "${RED}Trajectory file validation failed${NC}"
